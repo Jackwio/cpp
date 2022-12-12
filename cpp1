@@ -1,0 +1,78 @@
+#include <iostream>
+#include<vector>
+#include<algorithm>
+#include<utility>
+using namespace std;
+typedef pair<int,int> source_destination ;
+vector <pair < int , source_destination > > edges ;
+
+int * ranks , * parent ;
+
+int findParent(int u){
+    if( u != parent[u]){
+        parent[u] = findParent(parent[u]) ;
+    }
+    return parent[u] ;
+}
+
+void mergeSet( int u , int v ){
+
+    if( ranks[u] > ranks[v] ){
+        parent[v] = u ;
+    }
+    else{
+        parent[u] = v ;
+    }
+
+    if( ranks[u] == ranks[v] ){
+        ranks[v]++ ;
+    }
+}
+
+int calculate(){
+
+    int weight_cost = 0 ;
+    int x , y ,set_x , set_y ;
+
+    sort( edges.begin() , edges.end() ) ;
+    vector <pair < int , source_destination > > ::iterator it ;
+
+    for( it = edges.begin() ; it != edges.end() ; it++ ){
+        x = it->second.first ;
+        y = it->second.second ;
+        set_x = findParent(x) ;
+        set_y = findParent(y) ;
+
+        //不形成cycle條件
+        if( set_x != set_y){
+            mergeSet( set_x , set_y ) ;
+            weight_cost += it->first ;
+        }
+    }
+    return weight_cost ;
+}
+
+int main()
+{
+    int vertice , edge ;
+    int source , destination , weight ;
+
+    cin >> vertice >> edge ;
+
+    for( int i = 0 ; i < edge ; i++ ){
+        cin >> source >> destination >> weight ;
+        edges.push_back( { weight , { source , destination } } ) ;
+    }
+
+    ranks = new int[vertice+1] ;
+    parent = new int[vertice+1] ;
+
+    for( int j = 0 ; j < vertice ; j++ ){
+        parent[j] = j ;
+        ranks[j] = 0 ;
+    }
+
+    cout << calculate() ;
+
+    return 0;
+}
